@@ -1,0 +1,25 @@
+ ## User settings
+Config.xcconfig
+xcuserdata/
+*.xcuserstate
+*.xcscheme
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+
+# CocoaPods
+Pods/
+
+# Mac OS X
+.DS_Store
+.AppleDouble
+.LSOverride
