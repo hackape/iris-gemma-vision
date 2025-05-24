@@ -58,13 +58,91 @@ class GemmaService {
     static let shared = GemmaService()
     private let apiKey: String
     private let baseURL = USE_OPENROUTER ? OpenRouterBaseUrl : CloudflareBaseUrl
+    private var currentTask: URLSessionDataTask?
     
     private init() {
         // Get API key from environment or configuration
         self.apiKey = USE_OPENROUTER ? (ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"] ?? "") : (ProcessInfo.processInfo.environment["CLOUDFLARE_API_KEY"] ?? "")
     }
     
+    private func getUserLanguagePreference() -> String {
+        let locale = Locale.current
+        let languageCode = locale.language.languageCode?.identifier ?? "en"
+        // let regionCode = locale.region?.identifier
+        
+        // Map language codes to more descriptive names for the AI
+        // Handle region-specific variants where relevant
+        switch languageCode {
+        case "zh":
+            // // Distinguish between Simplified and Traditional Chinese
+            // if let region = regionCode {
+            //     switch region {
+            //     case "CN", "SG": return "Chinese (Simplified)"
+            //     case "TW", "HK", "MO": return "Chinese (Traditional)"
+            //     default: return "Chinese"
+            //     }
+            // }
+            return "Chinese"
+        case "en":
+            return "English"
+        case "ja":
+            return "Japanese"
+        case "ko":
+            return "Korean"
+        case "es":
+            return "Spanish"
+        case "fr":
+            return "French"
+        case "de":
+            return "German"
+        case "it":
+            return "Italian"
+        case "pt":
+            return "Portuguese"
+        case "ru":
+            return "Russian"
+        case "ar":
+            return "Arabic"
+        case "hi":
+            return "Hindi"
+        case "th":
+            return "Thai"
+        case "vi":
+            return "Vietnamese"
+        case "id":
+            return "Indonesian"
+        case "ms":
+            return "Malay"
+        case "tr":
+            return "Turkish"
+        case "pl":
+            return "Polish"
+        case "nl":
+            return "Dutch"
+        case "sv":
+            return "Swedish"
+        case "da":
+            return "Danish"
+        case "no":
+            return "Norwegian"
+        case "fi":
+            return "Finnish"
+        case "he":
+            return "Hebrew"
+        default:
+            return "English" // Default fallback
+        }
+    }
+    
+    func cancelCurrentRequest() {
+        currentTask?.cancel()
+        currentTask = nil
+    }
+    
     func processImage(_ imageBase64: String) async throws -> String {
+        let userLanguage = getUserLanguagePreference()
+        print("Detected user language preference: \(userLanguage)")
+        
         let systemMessage = Message(
             role: "system",
             content: [
@@ -84,7 +162,7 @@ class GemmaService {
                     
                     Ignore elements that are not relevant to navigation.
                     
-                    User's language preference: Chinese.
+                    User's language preference: \(userLanguage).
                     """,
                     image_url: nil
                 )
@@ -117,10 +195,30 @@ class GemmaService {
         print("request headers: \(String(describing: urlRequest.allHTTPHeaderFields))")
 
         let timeStart = Date()
-        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        // Use a custom URLSession task that can be cancelled
+        let (data, response): (Data, URLResponse) = try await withCheckedThrowingContinuation { continuation in
+            let task = URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let data = data, let response = response {
+                    continuation.resume(returning: (data, response))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error"]))
+                }
+            }
+            
+            // Store the task so it can be cancelled
+            self.currentTask = task
+            task.resume()
+        }
+        
         let timeEnd = Date()
         let timeElapsed = timeEnd.timeIntervalSince(timeStart)
         print("time elapsed: \(timeElapsed) seconds")
+        
+        // Clear the current task
+        currentTask = nil
         
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {

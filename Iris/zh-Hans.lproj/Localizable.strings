@@ -1,0 +1,11 @@
+ /* LiveCameraView Strings */
+"captured_image" = "已拍摄的照片";
+"processing" = "正在处理中...";
+"cancel" = "取消";
+"take_photo" = "拍照识别";
+"image_processing_error" = "抱歉，无法识别这张图片。";
+
+/* Camera Preview Strings */
+"camera_not_available_simulator" = "模拟器无法使用相机";
+"capture_session_not_initialized" = "相机会话未初始化";
+"failed_to_access_camera" = "无法访问相机";
