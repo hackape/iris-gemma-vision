@@ -12,6 +12,7 @@ struct LiveCameraView: View {
     @State private var isLoading = false
     @State private var currentTask: Task<Void, Never>?
     @AccessibilityFocusState private var isModalFocused: Bool
+    @AccessibilityFocusState private var isTakePhotoButtonFocused: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -88,6 +89,7 @@ struct LiveCameraView: View {
 
             HStack {
                 Button(action: {
+                    cancelCurrentProcess()
                     cameraCoordinator.capturePhoto()
                 }) {
                     Image(systemName: "camera.fill")
@@ -98,6 +100,7 @@ struct LiveCameraView: View {
                         .clipShape(Circle())
                 }
                 .accessibilityLabel(NSLocalizedString("take_photo", comment: "Take photo button"))
+                .accessibilityFocused($isTakePhotoButtonFocused)
 
                 if capturedImage != nil {
                     Button(action: {
@@ -118,6 +121,12 @@ struct LiveCameraView: View {
         .onReceive(cameraCoordinator.$capturedImage) { image in
             guard let image = image else { return }
             processCapturedImage(image)
+        }
+        .onAppear {
+            // Focus on the take photo button when the view first loads
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isTakePhotoButtonFocused = true
+            }
         }
     }
 
@@ -153,7 +162,6 @@ struct LiveCameraView: View {
             self.capturedImage = resizedImage
             self.showModal = true
             self.isLoading = true
-            // self.isModalFocused = true
             self.modalContent = ""
         }
 
@@ -231,8 +239,12 @@ struct CameraPreview: UIViewRepresentable {
             return view
         }
 
-        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
-              let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+        // Try to use ultra-wide camera (0.5x) first, fallback to wide-angle if not available
+        let videoDevice = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) ??
+                         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+        
+        guard let device = videoDevice,
+              let videoInput = try? AVCaptureDeviceInput(device: device),
               captureSession.canAddInput(videoInput) else {
             view.backgroundColor = .black
             let label = UILabel()
