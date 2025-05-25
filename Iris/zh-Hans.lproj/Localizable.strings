@@ -1,6 +1,6 @@
  /* LiveCameraView Strings */
 "captured_image" = "已拍摄的照片";
-"processing" = "正在处理中...";
+"processing" = "正在处理中";
 "cancel" = "取消";
 "take_photo" = "拍照识别";
 "image_processing_error" = "抱歉，无法识别这张图片。";

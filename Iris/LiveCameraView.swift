@@ -52,7 +52,7 @@ struct LiveCameraView: View {
                         VStack(spacing: 16) {
                             if isLoading {
                                 ProgressView(NSLocalizedString("processing", comment: "Loading message"))
-                                    .font(.headline)
+                                    .font(.largeTitle)
                                     .accessibilityFocused($isModalFocused)
                                     .onAppear {
                                         // Focus VoiceOver on the modal content
@@ -62,7 +62,7 @@ struct LiveCameraView: View {
                                     }
                             } else {
                                 Text(modalContent)
-                                    .font(.headline)
+                                    .font(.largeTitle)
                                     .multilineTextAlignment(.leading)
                                     .accessibilityLabel(modalContent)
                                     .accessibilityFocused($isModalFocused)
@@ -70,10 +70,10 @@ struct LiveCameraView: View {
                         }
                         // .accessibilityAddTraits(.updatesFrequently)
                         .padding(20)
-                        .background(Color.black.opacity(0.85))
-                        .foregroundColor(.white)
+                        .background(Color.white.opacity(0.85))
+                        .foregroundColor(.black)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 4)
+                        .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 4)
                         .frame(maxWidth: 300)
                         Spacer()
                     }
@@ -95,8 +95,8 @@ struct LiveCameraView: View {
                     Image(systemName: "camera.fill")
                         .font(.largeTitle)
                         .padding()
-                        .background(Color.black.opacity(0.5))
-                        .foregroundColor(.white)
+                        .background(Color.white.opacity(0.5))
+                        .foregroundColor(.black)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel(NSLocalizedString("take_photo", comment: "Take photo button"))
@@ -109,8 +109,8 @@ struct LiveCameraView: View {
                         Image(systemName: "xmark")
                             .font(.largeTitle)
                             .padding()
-                            .background(Color.black.opacity(0.5))
-                            .foregroundColor(.white)
+                            .background(Color.white.opacity(0.5))
+                            .foregroundColor(.black)
                             .clipShape(Circle())
                     }
                     .accessibilityLabel(NSLocalizedString("cancel", comment: "Cancel button"))

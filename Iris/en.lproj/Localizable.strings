@@ -1,6 +1,6 @@
  /* LiveCameraView Strings */
 "captured_image" = "Captured photo";
-"processing" = "Processing...";
+"processing" = "Processing";
 "cancel" = "Cancel";
 "take_photo" = "Take photo to identify";
 "image_processing_error" = "Sorry, I could not describe the image.";
